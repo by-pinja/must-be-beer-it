@@ -1,5 +1,2 @@
-FROM nginx:mainline
-
-COPY ./nginx.conf /etc/nginx/conf.d/default.conf
-
-COPY ./exampleApp/ /usr/share/nginx/html
+FROM php:7.1.11-apache-jessie
+COPY ./api/ /var/www/html/

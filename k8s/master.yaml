@@ -71,3 +71,76 @@ spec:
   tls:
     - hosts:
       - must-be-beer-it-master.protacon.cloud
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: must-be-beer-it-torch-master
+    version: master
+  name: must-be-beer-it-torch-master
+  namespace: must-be-beer-it
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: must-be-beer-it-torch-master
+      version: master
+  template:
+    metadata:
+      labels:
+        app: must-be-beer-it-torch-master
+        version: master
+      name: must-be-beer-it-torch-master
+    spec:
+      containers:
+      - image: crisbal/torch-rnn:base
+        name: must-be-beer-it-torch-master
+        command: [ "/bin/bash", "-c", "--" ]
+        args: [ "while true; do sleep 30; done;" ]
+        volumeMounts:
+        - mountPath: /var/temp/
+          name: must-be-beer-it-torch-master-storage
+      volumes:
+      - name: must-be-beer-it-torch-master-storage
+        persistentVolumeClaim:
+          claimName:  must-be-beer-it-torch-master-storage
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: must-be-beer-it-torch-master
+    version: master
+  name: must-be-beer-it-torch-master
+  namespace: must-be-beer-it
+spec:
+  type: ClusterIP
+  ports:
+  - port: 22
+    protocol: TCP
+    targetPort: 22
+  selector:
+    app: must-be-beer-it-torch-master
+    version: master
+
+---
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: must-be-beer-it-torch-master-storage
+  namespace: must-be-beer-it
+  annotations:
+    volume.beta.kubernetes.io/storage-class: fast
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+
+---
