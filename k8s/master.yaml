@@ -1,0 +1,73 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: must-be-beer-it
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: must-be-beer-it-master
+    version: master
+  name: must-be-beer-it-master
+  namespace: must-be-beer-it
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: must-be-beer-it-master
+      version: master
+  template:
+    metadata:
+      labels:
+        app: must-be-beer-it-master
+        version: master
+      name: must-be-beer-it-master
+    spec:
+      containers:
+      - image: eu.gcr.io/ptcs-docker-registry/must-be-beer-it:latest-master
+        imagePullPolicy: Always
+        name: must-be-beer-it-master
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: must-be-beer-it-master
+    version: master
+  name: must-be-beer-it-master
+  namespace: must-be-beer-it
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: must-be-beer-it-master
+    version: master
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: must-be-beer-it-master-ingress
+  namespace: must-be-beer-it
+  annotations:
+    kubernetes.io/ingress.class: traefik
+spec:
+  rules:
+    - host: must-be-beer-it-master.protacon.cloud
+      http:
+        paths:
+          - backend:
+              serviceName: must-be-beer-it-master
+              servicePort: 80
+  tls:
+    - hosts:
+      - must-be-beer-it-master.protacon.cloud
